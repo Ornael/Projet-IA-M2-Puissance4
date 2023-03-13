@@ -144,7 +144,7 @@ class Board :
         return -1
 
 if __name__ == '__main__': 
-    board = Board(ConsolePlayer("Axel"),MCSTPlayer("Lexa",iter=2000,c=4))
+    board = Board(MCSTPlayer("Axel",iter=1500,c=4),MCSTPlayer("Lexa",iter=1500,c=4))
 
     while board.checkWin() < 0 and board.turnplayed < board.rows * board.cols :
 

@@ -104,32 +104,46 @@ class MCSTPlayer(Player) :
                 
                 currentNode = currentNode.children[succUCB.index(max(succUCB))]
             
-            #creating children
-            for i in range(board.cols) :
-                if(currentNode.board.firstfreerow[i] < board.rows) :
-                    nb = currentNode.board.clone()
-                    nb.play(i + 1)
-                    Node(currentNode.name + str(i),board=nb,won=0,played=0,parent=currentNode)
+            if currentNode.board.checkWin() < 0 and currentNode.board.turnplayed < board.cols * board.rows: #if board is not a final board
+                #creating children
+                for i in range(board.cols) :
+                    if(currentNode.board.firstfreerow[i] < board.rows) :
+                        nb = currentNode.board.clone()
+                        nb.play(i + 1)
+                        Node(currentNode.name + str(i),board=nb,won=0,played=0,parent=currentNode)
+                    
+                #selecting a random son
                 
-            #selecting a random son
-            selectedson = currentNode.children[random.randint(0,len(currentNode.children) - 1)]
+                selectedson = currentNode.children[random.randint(0,len(currentNode.children) - 1)]
 
-            #random playout
-            start = selectedson.board.clone()
-            while start.checkWin() < 0 and start.turnplayed < start.rows * start.cols :
-                start.play(random.randint(1,start.cols))
+                #random playout
+                start = selectedson.board.clone()
+                while start.checkWin() < 0 and start.turnplayed < start.rows * start.cols :
+                    start.play(random.randint(1,start.cols))
             
-            won = True if self.name != start.player.name else False
+                if start.turnplayed == start.rows * start.cols :
+                    won = 0
+                else :
+                    won = 1 if self.name != start.player.name else -1
+            else :
+                selectedson = currentNode
+                if currentNode.board.turnplayed == board.rows * board.cols :
+                    won = 0
+                elif currentNode.board.player.name != self.name :
+                    won = 1
+                else :
+                    won = -1
+
 
             #backpropagate
             while selectedson != root :
                 selectedson.played += 1
-                if won :
+                if won == 1:
                     if selectedson.board.player.name != self.name : 
                         selectedson.won += 1
                     else : 
                         selectedson.won -= 10
-                else :
+                elif won == -1 :
                     if selectedson.board.player.name != self.name : 
                         selectedson.won -= 10
                     else : 
