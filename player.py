@@ -1,7 +1,7 @@
 import random
 from abc import ABC, abstractmethod
 import math
-from anytree import Node
+from anytree import Node,RenderTree
 
 class Player(ABC) :
     def __init__(self,name) :
@@ -57,18 +57,20 @@ class MinMaxPlayer(Player) :
 
 class MCSTPlayer(Player) :
 
-    def __init__(self, name, iter = 1000):
+    def __init__(self, name, iter = 1000,c = 1.414):
         super().__init__(name)
         self.iter = iter
+        self.c = c
 
     def moveChoice(self,board) : 
         newboard = board.clone()
-        values = self.MCST(newboard,1.41)
+        values = self.MCST(newboard,4)
+        print(values)
         return values.index(max(values)) + 1
 
-    def UCB1(self,played : int, won : int,N : int,c : float) -> float :
+    def UCB1(self,played : int, won : int,N : int) -> float :
         if played == 0 : return math.inf
-        return won / played + c * math.sqrt(math.log(N)/played)
+        return won / played + self.c * math.sqrt(math.log(N)/played)
     
     def MCST(self,board,c : float) -> list[int] :
 
@@ -78,29 +80,35 @@ class MCSTPlayer(Player) :
         for i in range(board.cols) :
             if(board.firstfreerow[i] < board.rows) :
                 nb = board.clone()
-                nb.play(i)
+                nb.play(i+1)
+                if nb.checkWin() > 0 :
+                    d = [0] * board.cols
+                    d[i] = 1
+                    return d
                 Node("0"+ str(i),board=nb,won=0,played=0,parent=root)
             else :
                 denom[i] = -1
+
 
         iteration = self.iter
 
         while(iteration > 0) :
 
             currentNode : Node = root
-
+            
             #finding a leaf node
             while (len(currentNode.children) > 0) :
                 succUCB = []
                 for succ in currentNode.children :
-                    succUCB.append(self.UCB1(played=succ.played,won=succ.won,N=currentNode.played,c=c))
+                    succUCB.append(self.UCB1(played=succ.played,won=succ.won,N=currentNode.played))
                 
+                #if currentNode.name == "0" : print(succUCB)
                 currentNode = currentNode.children[succUCB.index(max(succUCB))]
             
             #creating children
             for i in range(board.cols) :
-                if(board.firstfreerow[i] < board.rows) :
-                    nb = board.clone()
+                if(currentNode.board.firstfreerow[i] < board.rows) :
+                    nb = currentNode.board.clone()
                     nb.play(i)
                     Node(currentNode.name + str(i),board=nb,won=0,played=0,parent=currentNode)
                 
@@ -115,24 +123,37 @@ class MCSTPlayer(Player) :
             won = True if self.name != start.player.name else False
 
             #backpropagate
-            while selectedson.parent != root :
+            while selectedson != root :
                 selectedson.played += 1
-                if won and selectedson.board.player.name != self.name : selectedson.won += 1
-                if not won and selectedson.board.player.name == self.name : selectedson.won += 1
+                if won :
+                    if selectedson.board.player.name != self.name : 
+                        selectedson.won += 1
+                    else : 
+                        selectedson.won -= 1
+                else :
+                    if selectedson.board.player.name != self.name : 
+                        selectedson.won -= 1
+                    else : 
+                        selectedson.won += 1
+
                 selectedson = selectedson.parent
-                print(selectedson.name)
             
             root.played += 1
 
             iteration -= 1
 
+        #print(RenderTree(root))
+         
+        for children in root.children :
+            print(children) 
         #prepare denom array
         count = 0
+
         for i in range(board.cols) :
             if denom[i] >= 0 :
-                denom[i] == root.children[count].played
+                denom[i] = root.children[count].played
                 count += 1
-
+                
         return denom
 
     

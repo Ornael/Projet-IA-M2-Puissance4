@@ -1,5 +1,5 @@
 import copy
-from player import Player,RandomPlayer,MinMaxPlayer,MCSTPlayer
+from player import Player,RandomPlayer,MinMaxPlayer,MCSTPlayer,ConsolePlayer
 import time
 
 class Board :
@@ -144,14 +144,14 @@ class Board :
         return -1
 
 if __name__ == '__main__': 
-    board = Board(RandomPlayer("Axel"),MCSTPlayer("Lexa"))
+    board = Board(ConsolePlayer("Axel"),MCSTPlayer("Lexa",iter=2000,c=4))
 
     while board.checkWin() < 0 and board.turnplayed < board.rows * board.cols :
 
         if board.play(board.player.moveChoice(board))  : #try to play, print if move successful
             print(board.getOtherPlayerName())
             board.print()
-            time.sleep(1)
+            #time.sleep(1)
             
 if board.turnplayed < board.rows * board.cols :
     print("Win : " + board.getOtherPlayerName())
