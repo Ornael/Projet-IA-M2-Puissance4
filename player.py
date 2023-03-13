@@ -14,20 +14,18 @@ class Player(ABC) :
     
 
 class RandomPlayer(Player) :
-
     def moveChoice(self,board) : 
         return random.randint(1,board.cols)
 
 
 class ConsolePlayer(Player) :
-
     def moveChoice(self,board) : 
         while(True) :
-                column = input("Play in which column ? : ").strip()
-                if column.isdigit() :
-                    return int(column)
-                else : 
-                    print("invalid entry")
+            column = input("Play in which column ? : ").strip()
+            if column.isdigit() :
+                return int(column)
+            else : 
+                print("invalid entry")
 
 class InterfacePlayer(Player) :
     def moveChoice(self,board,clickedColumn) : 
@@ -56,39 +54,36 @@ class MinMaxPlayer(Player) :
          return random.randint(1,7)
 
 class MCSTPlayer(Player) :
-
     def __init__(self, name, iter = 1000,c = 1.414):
         super().__init__(name)
         self.iter = iter
         self.c = c
 
     def moveChoice(self,board) : 
-
         if board.winNextMove() >= 0 :
             return board.winNextMove()
         
         newboard = board.clone()
         values = self.MCST(newboard)
-        print(values)
         return values.index(max(values)) + 1
 
+    #calculate the upper confidence bound value of a node
     def UCB1(self,played : int, won : int,N : int) -> float :
         if played == 0 : return math.inf
         return won / played + self.c * math.sqrt(math.log(N)/played)
     
     def MCST(self,board) -> list[int] :
-
         root = Node("0",board=board,won=0,played=1)
         denom = [0] * board.cols
 
+        #create children of root
         for i in range(board.cols) :
             if(board.firstfreerow[i] < board.rows) :
                 nb = board.clone()
                 nb.play(i+1)
                 Node("0"+ str(i),board=nb,won=0,played=0,parent=root)
             else :
-                denom[i] = -1
-
+                denom[i] = -10000 #if the move is not possible
 
         iteration = self.iter
 
@@ -102,9 +97,10 @@ class MCSTPlayer(Player) :
                 for succ in currentNode.children :
                     succUCB.append(self.UCB1(played=succ.played,won=succ.won,N=currentNode.played))
                 
-                currentNode = currentNode.children[succUCB.index(max(succUCB))]
+                currentNode = currentNode.children[succUCB.index(max(succUCB))] #choose the node with max UBC
             
             if currentNode.board.checkWin() < 0 and currentNode.board.turnplayed < board.cols * board.rows: #if board is not a final board
+
                 #creating children
                 for i in range(board.cols) :
                     if(currentNode.board.firstfreerow[i] < board.rows) :
@@ -121,7 +117,7 @@ class MCSTPlayer(Player) :
                 while start.checkWin() < 0 and start.turnplayed < start.rows * start.cols :
                     start.play(random.randint(1,start.cols))
             
-                if start.turnplayed == start.rows * start.cols :
+                if start.turnplayed == start.rows * start.cols : #if draw
                     won = 0
                 else :
                     won = 1 if self.name != start.player.name else -1
@@ -129,23 +125,21 @@ class MCSTPlayer(Player) :
                 selectedson = currentNode
                 if currentNode.board.turnplayed == board.rows * board.cols :
                     won = 0
-                elif currentNode.board.player.name != self.name :
-                    won = 1
                 else :
-                    won = -1
-
+                    won = 1 if self.name != currentNode.board.player.name else -1
 
             #backpropagate
+            #won = 1 if mcst won, -1 if lose, and 0 if draw (nothing is done in case of draw for won value)
             while selectedson != root :
                 selectedson.played += 1
                 if won == 1:
                     if selectedson.board.player.name != self.name : 
                         selectedson.won += 1
                     else : 
-                        selectedson.won -= 10
+                        selectedson.won -= 3
                 elif won == -1 :
                     if selectedson.board.player.name != self.name : 
-                        selectedson.won -= 10
+                        selectedson.won -= 3
                     else : 
                         selectedson.won += 1
 
@@ -155,27 +149,14 @@ class MCSTPlayer(Player) :
 
             iteration -= 1
 
-        #print(RenderTree(root))
-         
-        for children in root.children :
-            print(children) 
         #prepare denom array
         count = 0
 
         for i in range(board.cols) :
-            if denom[i] >= 0 :
+            if denom[i] >= 0 : #if the move is possible
                 denom[i] = root.children[count].played
                 count += 1
                 
         return denom
 
     
-
-if __name__ == '__main__' :
-    root = Node("A")
-
-    # Create some child nodes and add them to the root node
-    b_node = Node("B", parent=root)
-    c_node = Node("C", parent=root)
-
-    print(len(root.children))

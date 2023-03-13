@@ -1,6 +1,5 @@
 import copy
 from player import Player,RandomPlayer,MinMaxPlayer,MCSTPlayer,ConsolePlayer
-import time
 
 class Board :
     def __init__(self,player1 : Player,player2: Player,rows = 6,cols = 7):
@@ -144,7 +143,7 @@ class Board :
         return -1
 
 if __name__ == '__main__': 
-    board = Board(MCSTPlayer("Axel",iter=1500,c=4),MCSTPlayer("Lexa",iter=1500,c=4))
+    board = Board(ConsolePlayer("Axel"),MCSTPlayer("Lexa",iter=1500,c=4))
 
     while board.checkWin() < 0 and board.turnplayed < board.rows * board.cols :
 
