@@ -63,8 +63,12 @@ class MCSTPlayer(Player) :
         self.c = c
 
     def moveChoice(self,board) : 
+
+        if board.winNextMove() >= 0 :
+            return board.winNextMove()
+        
         newboard = board.clone()
-        values = self.MCST(newboard,4)
+        values = self.MCST(newboard)
         print(values)
         return values.index(max(values)) + 1
 
@@ -72,7 +76,7 @@ class MCSTPlayer(Player) :
         if played == 0 : return math.inf
         return won / played + self.c * math.sqrt(math.log(N)/played)
     
-    def MCST(self,board,c : float) -> list[int] :
+    def MCST(self,board) -> list[int] :
 
         root = Node("0",board=board,won=0,played=1)
         denom = [0] * board.cols
@@ -81,10 +85,6 @@ class MCSTPlayer(Player) :
             if(board.firstfreerow[i] < board.rows) :
                 nb = board.clone()
                 nb.play(i+1)
-                if nb.checkWin() > 0 :
-                    d = [0] * board.cols
-                    d[i] = 1
-                    return d
                 Node("0"+ str(i),board=nb,won=0,played=0,parent=root)
             else :
                 denom[i] = -1
@@ -102,14 +102,13 @@ class MCSTPlayer(Player) :
                 for succ in currentNode.children :
                     succUCB.append(self.UCB1(played=succ.played,won=succ.won,N=currentNode.played))
                 
-                #if currentNode.name == "0" : print(succUCB)
                 currentNode = currentNode.children[succUCB.index(max(succUCB))]
             
             #creating children
             for i in range(board.cols) :
                 if(currentNode.board.firstfreerow[i] < board.rows) :
                     nb = currentNode.board.clone()
-                    nb.play(i)
+                    nb.play(i + 1)
                     Node(currentNode.name + str(i),board=nb,won=0,played=0,parent=currentNode)
                 
             #selecting a random son
@@ -129,10 +128,10 @@ class MCSTPlayer(Player) :
                     if selectedson.board.player.name != self.name : 
                         selectedson.won += 1
                     else : 
-                        selectedson.won -= 1
+                        selectedson.won -= 10
                 else :
                     if selectedson.board.player.name != self.name : 
-                        selectedson.won -= 1
+                        selectedson.won -= 10
                     else : 
                         selectedson.won += 1
 
