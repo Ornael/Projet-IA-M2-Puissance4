@@ -20,6 +20,7 @@ frm.grid()
 cnv = Canvas(frm, width=400, height=300)
 cnv.grid(column=1, row=0)
 
+
 # draw the grid of rectangles
 for i in range(num_rows):
     for j in range(num_columns):
@@ -29,13 +30,19 @@ for i in range(num_rows):
         y2 = y1 + cell_height
         cnv.create_rectangle(x1, y1, x2, y2, fill="white")
 
+def on_canvas_click(event):
+    column = (event.x - start_x) // 40
+    print("Clicked on column:", column+1)
+
+cnv.bind("<Button-1>", on_canvas_click)
+
 cnv2 = Canvas(frm, width=150, height=300)
 cnv2.grid(column=0, row=0)
 # create a label and add it to the second canvas
 Label(cnv2, text="J1").pack(side="top")
 stvar= StringVar()
 stvar.set("MonteCarlo")
-OptionMenu(cnv2,stvar, "MonteCarlo","MinMax").pack(side="top")
+OptionMenu(cnv2,stvar, "MonteCarlo","MinMax", "Joueur humain").pack(side="top")
 Button(cnv2,text="Jouer").pack(side="top")
 # create a red circle below the button in the second canvas
 x = 75  # x-coordinate of the center of the circle
@@ -49,7 +56,7 @@ cnv3.grid(column=2, row=0)
 Label(cnv3, text="J2").pack(side="top")
 stvar2= StringVar()
 stvar2.set("MonteCarlo")
-OptionMenu(cnv3,stvar2, "MonteCarlo","MinMax").pack(side="top")
+OptionMenu(cnv3,stvar2, "MonteCarlo","MinMax", "Joueur humain").pack(side="top")
 Button(cnv3,text="Jouer").pack(side="top")
 # create a red circle below the button in the second canvas
 x = 75  # x-coordinate of the center of the circle
