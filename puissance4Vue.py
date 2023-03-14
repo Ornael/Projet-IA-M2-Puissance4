@@ -36,16 +36,16 @@ def on_canvas_click(event):
                 board.print()
                 row, col = board.lastplay
                 num_joueur = board.player.number
-                if num_joueur == 0:
+                if num_joueur == 1:
                     cnv.create_oval((column * cell_width) + (cell_width / 2) - 15,
-                                    (row * cell_height) + (cell_width / 2) - 15,
+                                    ((5-row) * cell_height) + (cell_width / 2) - 15,
                                     (column * cell_width) + (cell_width / 2) + 15,
-                                    (row * cell_height) + (cell_width / 2) + 15, fill="red")
+                                    ((5-row) * cell_height) + (cell_width / 2) + 15, fill="red")
                 else:
                     cnv.create_oval((column * cell_width) + (cell_width / 2) - 15,
-                                    (row * cell_height) + (cell_width / 2) - 15,
+                                    ((5-row) * cell_height) + (cell_width / 2) - 15,
                                     (column * cell_width) + (cell_width / 2) + 15,
-                                    (row * cell_height) + (cell_width / 2) + 15, fill="yellow")
+                                    ((5-row) * cell_height) + (cell_width / 2) + 15, fill="yellow")
             else:
                 print("invalid move")
     else:

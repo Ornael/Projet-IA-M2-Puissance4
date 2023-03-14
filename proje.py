@@ -185,8 +185,19 @@ def evaluate(board) -> float :
                         j += 1
                         count +=1
                     
-                    possiblewinleft = 1 if True else False
-                    possiblewinright = 1 if True else False
+                    possiblewinright,possiblewinleft = 0,0
+                    if count == 1 :
+                        pass
+                    elif count == 2 :
+                        if j + 1 < board.cols and board.grille[i][j] == -1 and board.grille[i][j+1] == -1 :
+                            possiblewinright = 1
+                        if j -count - 1 >= 0 and board.grille[i][j -count -1] and board.grille[i][j -count -1] :
+                            possiblewinleft = 1
+                    elif count == 3 :
+                        if j < board.cols and board.grille[i][j] :
+                            possiblewinright = 1
+                        if j -count -1 >= 0 and board.grille[i][j -count -1] :
+                            possiblewinleft = 1
 
                     if symbol == board.player.number :
                         scoreboardplayer += (possiblewinright+possiblewinleft)*math.pow(10,count-1)
