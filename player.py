@@ -49,9 +49,76 @@ class MinMaxPlayer(Player) :
                 values[i] = self.minmax(nb.play(i),self.depth-1,-math.inf,math.inf,False) 
         
         return values.index(max(values)) + 1
+
+    def evaluate(self,board) -> float :
+        scoreboardplayer = 0
+        playernumber = board.player.number
+        scorepotherplayer = 0
+
+        i,j = 0,0
+        
+        #score rows
+        while i < board.rows :
+            while j < board.cols :
+                count = 0
+                symbol = board.grille[i][j]
+                freeleft = 1 if j > 0 and board.grille[i][j -1] == -1 else 0
+
+                if symbol > 0 :
+                    while board.grille[i][j] == symbol and j < board.cols :
+                        j += 1
+                        count +=1
+                    
+                    freeright = 1 if j < board.cols and board.grille[i][j] == -1 else 0
+
+                    if symbol == board.player.number :
+                        scoreboardplayer += (freeright+freeleft)*math.pow(10,count-1)
+                    else :
+                        scorepotherplayer += (freeright+freeleft)*math.pow(10,count-1)
+                else :
+                    j += 1
+            i += 1
+
+
+                
+
+
     
     def minmax(self,board, depth : int, alpha : int, beta : int, maximizing_player : bool) -> int :
-         return random.randint(1,7)
+         
+         if board.checkWin () > 0 : #winning board
+             return 1000 if not maximizing_player else -1000
+         elif board.turnplayed == board.cols * board.rows : #draw
+             return 0
+         elif depth == 0 :
+             return self.evaluate(board)
+         
+   
+         if(maximizing_player) :
+             value = - math.inf
+             for i in range(board.cols) :
+                 if board.firstfreerow[i] < board.cols :
+                     nb = board.clone()
+                     nb.play(i+1)
+                     minimax = self.minmax(depth=depth-1,alpha=alpha,beta=beta,board=nb,maximizing_player=False)
+                     value = value if value > minimax else minimax
+                     if value >= beta : return value
+                     alpha = value if value > alpha else alpha
+         else :
+             value = math.inf
+             for i in range(board.cols) :
+                 if board.firstfreerow[i] < board.cols :
+                     nb = board.clone()
+                     nb.play(i+1)
+                     minimax = self.minmax(depth=depth-1,alpha=alpha,beta=beta,board=nb,maximizing_player=True)
+                     value = value if value < minimax else minimax
+                     if value <= alpha : return value
+                     beta = value if value < beta else beta
+
+         return value
+             
+    
+         
 
 class MCSTPlayer(Player) :
     def __init__(self, name, iter = 1000,c = 1.414):
@@ -159,4 +226,4 @@ class MCSTPlayer(Player) :
                 
         return denom
 
-    
+

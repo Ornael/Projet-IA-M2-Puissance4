@@ -1,5 +1,6 @@
 import copy
 from player import Player,RandomPlayer,MinMaxPlayer,MCSTPlayer,ConsolePlayer
+import math
 
 class Board :
     def __init__(self,player1 : Player,player2: Player,rows = 6,cols = 7):
@@ -142,17 +143,60 @@ class Board :
                 return i+1       
         return -1
 
-if __name__ == '__main__': 
-    board = Board(ConsolePlayer("Axel"),MCSTPlayer("Lexa",iter=1500,c=4))
+""" if __name__ == '__main__': 
+    board = Board(MCSTPlayer("Axel",iter=1500,c=4),MCSTPlayer("Lexa",iter=1500,c=4),5,5)
 
     while board.checkWin() < 0 and board.turnplayed < board.rows * board.cols :
 
         if board.play(board.player.moveChoice(board))  : #try to play, print if move successful
             print(board.getOtherPlayerName())
-            board.print()
+            board.print("§","*")
             #time.sleep(1)
             
 if board.turnplayed < board.rows * board.cols :
     print("Win : " + board.getOtherPlayerName())
 else :
-    print("Draw")
+    print("Draw") """
+
+
+
+board = Board(MCSTPlayer("Axel",iter=1500,c=4),MCSTPlayer("Lexa",iter=1500,c=4))
+
+board.play(2)
+board.play(7)
+board.play(3)
+board.play(4)
+board.print()
+
+def evaluate(board) -> float :
+        scoreboardplayer = 0
+        scorepotherplayer = 0
+
+        i,j = 0,0
+        
+        #score rows
+        while i < board.rows :
+            while j < board.cols :
+                count = 0
+                symbol = board.grille[i][j]
+
+                if symbol >= 0 :
+                    while j < board.cols and board.grille[i][j] == symbol :
+                        j += 1
+                        count +=1
+                    
+                    possiblewinleft = 1 if True else False
+                    possiblewinright = 1 if True else False
+
+                    if symbol == board.player.number :
+                        scoreboardplayer += (possiblewinright+possiblewinleft)*math.pow(10,count-1)
+                    else :
+                        scorepotherplayer += (possiblewinright+possiblewinleft)*math.pow(10,count-1)
+                else :
+                    j += 1
+            i += 1
+
+        return scoreboardplayer - scorepotherplayer
+
+print(evaluate(board))
+

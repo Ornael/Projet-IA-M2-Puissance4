@@ -1,4 +1,6 @@
 from tkinter import Tk, Canvas, Frame, Label, OptionMenu, StringVar, Button
+from proje import Board
+from player import InterfacePlayer
 
 # define the dimensions of the grid
 num_columns = 7
@@ -32,7 +34,24 @@ for i in range(num_rows):
 
 def on_canvas_click(event):
     column = (event.x - start_x) // 40
-    print("Clicked on column:", column+1)
+    if board.checkWin() < 0 :
+        if isinstance(board.player,InterfacePlayer) :
+            if column >= 0 and column < 7 and board.firstfreerow[column] < board.rows  :
+                board.play(column +1)
+                board.print()
+            else :
+                print("invalid move")
+    else :
+        print("Board is already final")
+        return
+        
+    if board.checkWin() > 0 :
+        print("Win : " + board.getOtherPlayerName())
+        return
+    if board.turnplayed == board.cols * board.rows :
+        print("Draw")
+        return
+    #print("Clicked on column:", column+1)
 
 cnv.bind("<Button-1>", on_canvas_click)
 
@@ -71,5 +90,7 @@ cnv.pack_propagate(False)
 cnv2.pack_propagate(False)
 cnv3.pack_propagate(False)
 cnv4.pack_propagate(False)
+
+board = Board(InterfacePlayer("Axel"),InterfacePlayer("Lexa"))
 
 root.mainloop()
