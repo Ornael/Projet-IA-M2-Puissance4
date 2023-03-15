@@ -1,19 +1,20 @@
 import copy
-from player import Player,RandomPlayer,MinMaxPlayer,MCSTPlayer,ConsolePlayer
+from player import Player,MinMaxPlayer,MCSTPlayer,ConsolePlayer
 import math
 
 class Board :
     def __init__(self,player1 : Player,player2: Player,rows = 6,cols = 7):
-        self.grille = []
-        self.rows = rows if rows > 3 else 4
-        self.cols = cols if cols > 3 else 4
+        self.grille : list[int] = []
+        self.rows : int = rows if rows > 3 else 4
+        self.cols : int = cols if cols > 3 else 4
+        self.draw : int  = self.rows * self.cols
         self.firstfreerow = [0] * self.cols
         for i in range(self.rows):
             self.grille.append([-1] * self.cols)
         self.lastplay = (0,0)
-        self.turnplayed = 0
-        player1.number = 0
-        player2.number = 1
+        self.turnplayed : int = 0
+        player1.number : int = 0
+        player2.number : int = 1
         self.player1 = player1
         self.player2 = player2
         self.player = player1
@@ -56,7 +57,7 @@ class Board :
     #if win, return player number else -1
     def checkWin(self) -> int : 
 
-        if self.turnplayed ==  0  : return -1
+        if self.turnplayed < 7  : return -1
     
         row, col = self.lastplay
         symbol = self.grille[row][col]
@@ -143,71 +144,31 @@ class Board :
                 return i+1       
         return -1
 
-""" if __name__ == '__main__': 
-    board = Board(MCSTPlayer("Axel",iter=1500,c=4),MCSTPlayer("Lexa",iter=1500,c=4),5,5)
+if __name__ == '__main__': 
+    board = Board(MCSTPlayer("Axel",4000,2),MinMaxPlayer("Lexa",depth=6),6,7)
 
-    while board.checkWin() < 0 and board.turnplayed < board.rows * board.cols :
+    while board.checkWin() < 0 and board.turnplayed < board.draw :
 
         if board.play(board.player.moveChoice(board))  : #try to play, print if move successful
             print(board.getOtherPlayerName())
-            board.print("§","*")
-            #time.sleep(1)
-            
-if board.turnplayed < board.rows * board.cols :
+            print("played : ")
+            board.print()
+
+if board.turnplayed < board.draw :
     print("Win : " + board.getOtherPlayerName())
 else :
-    print("Draw") """
+    print("Draw")
 
 
 
-board = Board(MCSTPlayer("Axel",iter=1500,c=4),MCSTPlayer("Lexa",iter=1500,c=4))
+""" board = Board(ConsolePlayer("Axel"),MinMaxPlayer("Lexa",depth=6),6,7)
 
-board.play(2)
-board.play(7)
-board.play(3)
 board.play(4)
+board.play(4)
+board.play(5)
+board.play(6)
+board.play(3)
 board.print()
 
-def evaluate(board) -> float :
-        scoreboardplayer = 0
-        scorepotherplayer = 0
-
-        i,j = 0,0
-        
-        #score rows
-        while i < board.rows :
-            while j < board.cols :
-                count = 0
-                symbol = board.grille[i][j]
-
-                if symbol >= 0 :
-                    while j < board.cols and board.grille[i][j] == symbol :
-                        j += 1
-                        count +=1
-                    
-                    possiblewinright,possiblewinleft = 0,0
-                    if count == 1 :
-                        pass
-                    elif count == 2 :
-                        if j + 1 < board.cols and board.grille[i][j] == -1 and board.grille[i][j+1] == -1 :
-                            possiblewinright = 1
-                        if j -count - 1 >= 0 and board.grille[i][j -count -1] and board.grille[i][j -count -1] :
-                            possiblewinleft = 1
-                    elif count == 3 :
-                        if j < board.cols and board.grille[i][j] :
-                            possiblewinright = 1
-                        if j -count -1 >= 0 and board.grille[i][j -count -1] :
-                            possiblewinleft = 1
-
-                    if symbol == board.player.number :
-                        scoreboardplayer += (possiblewinright+possiblewinleft)*math.pow(10,count-1)
-                    else :
-                        scorepotherplayer += (possiblewinright+possiblewinleft)*math.pow(10,count-1)
-                else :
-                    j += 1
-            i += 1
-
-        return scoreboardplayer - scorepotherplayer
-
 print(evaluate(board))
-
+ """

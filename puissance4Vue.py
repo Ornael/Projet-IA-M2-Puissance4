@@ -52,7 +52,7 @@ def on_canvas_click(event):
         print("Board is already final")
         return
 
-    if board.checkWin() > 0:
+    if board.checkWin() >= 0:
         print("Win : " + board.getOtherPlayerName())
         return
     if board.turnplayed == board.cols * board.rows:

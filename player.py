@@ -1,7 +1,7 @@
 import random
 from abc import ABC, abstractmethod
 import math
-from anytree import Node,RenderTree
+from anytree import Node
 
 class Player(ABC) :
     def __init__(self,name) :
@@ -38,66 +38,34 @@ class MinMaxPlayer(Player) :
         self.depth = depth
 
     def moveChoice(self,board) :  
-        if board.winNextMove() >= 0 :
+        if board.winNextMove() > 0 :
             return board.winNextMove()
-        
-        values = [-1000] * board.cols
+        if board.turnplayed == 0 : return 4
+
+        values = [-1000000] * board.cols
 
         for i in range(board.cols) :
             if board.firstfreerow[i] < board.rows :
                 nb = board.clone()
-                values[i] = self.minmax(nb.play(i),self.depth-1,-math.inf,math.inf,False) 
+                nb.play(i+1)
+                values[i] = self.minmax(nb,self.depth-1,-100000,100000,False) 
         
+        print( values)
         return values.index(max(values)) + 1
-
-    def evaluate(self,board) -> float :
-        scoreboardplayer = 0
-        playernumber = board.player.number
-        scorepotherplayer = 0
-
-        i,j = 0,0
-        
-        #score rows
-        while i < board.rows :
-            while j < board.cols :
-                count = 0
-                symbol = board.grille[i][j]
-                freeleft = 1 if j > 0 and board.grille[i][j -1] == -1 else 0
-
-                if symbol > 0 :
-                    while board.grille[i][j] == symbol and j < board.cols :
-                        j += 1
-                        count +=1
-                    
-                    freeright = 1 if j < board.cols and board.grille[i][j] == -1 else 0
-
-                    if symbol == board.player.number :
-                        scoreboardplayer += (freeright+freeleft)*math.pow(10,count-1)
-                    else :
-                        scorepotherplayer += (freeright+freeleft)*math.pow(10,count-1)
-                else :
-                    j += 1
-            i += 1
-
-
-                
-
-
-    
-    def minmax(self,board, depth : int, alpha : int, beta : int, maximizing_player : bool) -> int :
+   
+    def minmax(self,board, depth : int, alpha : int, beta : int, maximizing_player : bool) -> float :
          
-         if board.checkWin () > 0 : #winning board
-             return 1000 if not maximizing_player else -1000
-         elif board.turnplayed == board.cols * board.rows : #draw
+         if board.checkWin() >= 0 : #winning board
+             return 100000 if not maximizing_player else -100000
+         elif board.turnplayed == board.draw : #draw
              return 0
          elif depth == 0 :
              return self.evaluate(board)
-         
    
          if(maximizing_player) :
-             value = - math.inf
+             value = - 100000
              for i in range(board.cols) :
-                 if board.firstfreerow[i] < board.cols :
+                 if board.firstfreerow[i] < board.rows :
                      nb = board.clone()
                      nb.play(i+1)
                      minimax = self.minmax(depth=depth-1,alpha=alpha,beta=beta,board=nb,maximizing_player=False)
@@ -105,9 +73,9 @@ class MinMaxPlayer(Player) :
                      if value >= beta : return value
                      alpha = value if value > alpha else alpha
          else :
-             value = math.inf
+             value = 100000
              for i in range(board.cols) :
-                 if board.firstfreerow[i] < board.cols :
+                 if board.firstfreerow[i] < board.rows :
                      nb = board.clone()
                      nb.play(i+1)
                      minimax = self.minmax(depth=depth-1,alpha=alpha,beta=beta,board=nb,maximizing_player=True)
@@ -116,10 +84,87 @@ class MinMaxPlayer(Player) :
                      beta = value if value < beta else beta
 
          return value
-             
+
+        
+    def evaluate(self,board) -> float :
+        scoreboardplayer = 0
+        scoreotherplayer = 0
+
+        i,j = 0,0
+        
+        #score rows
+        #if OOO : check if right or left is empty, OO : if OO-O or O-OO then 3, if --OO or OO-- then 2
+        # 1 : if O--- or O--- then 1, if O--O or O-O- or -O-O then 2 
+        while i < board.rows :
+            while j < board.cols:
+                symbol = board.grille[i][j]
+                
+                if symbol >= 0 :
+
+                    othersymbol = 1 - symbol
+                    originalj = j
+                    winright,winleft = 0,0
+                    count = 1
+                    j+=1
+                    
+                    while j < board.cols and board.grille[i][j] == symbol :
+                        count *=10
+                        j += 1
+
+                    aligned = j -originalj
+                    if aligned == 3 : #3 in a row
+                        if j < board.cols and board.grille[i][j] == -1 : winright = 1
+                        if originalj > 0 and board.grille[i][originalj -1] == - 1 : winleft = 1
+                    elif aligned == 2 :
+                        if j < board.cols - 1 :
+                            if board.grille[i][j] != othersymbol and board.grille[i][j + 1] != othersymbol :
+                                winright = 1
+                                if board.grille[i][j+1] == symbol : count *= 10
+                        if originalj > 1 : 
+                            if board.grille[i][originalj - 1] != othersymbol and board.grille[i][originalj - 2] != othersymbol :
+                                winleft = 1
+                                if board.grille[i][originalj - 2] == symbol : count *= 10
+                    else :
+                        pass
+
+                    if symbol == self.number :
+                        scoreboardplayer += (winright+winleft) * count
+                    else :
+                        scoreotherplayer += (winleft+winright) * count
+                else :
+                    j += 1
+            i += 1
+            j = 0
+        
+        #score cols
+
+        i,j = 0,0
+
+        while i < board.cols :
+            while j < board.rows - 3 :
+                symbol = board.grille[j][i]
+                othersymbol = 1 - symbol
+                if symbol >= 0 and board.grille[j+1][i] != othersymbol and board.grille[j+2][i] != othersymbol   and board.grille[j+3][i] != othersymbol :
+                    count = 1
+                    j+=1
+                    while j < board.rows and board.grille[j][i] == symbol :
+                        j += 1
+                        count *= 10
+
+                    if symbol == self.number :
+                        scoreboardplayer += count
+                    else :
+                        scoreotherplayer += count
+                else :
+                    j += 1
+            i += 1
+            j = 0
+
+
+        return scoreboardplayer - scoreotherplayer
+
     
          
-
 class MCSTPlayer(Player) :
     def __init__(self, name, iter = 1000,c = 1.414):
         super().__init__(name)
@@ -129,6 +174,7 @@ class MCSTPlayer(Player) :
     def moveChoice(self,board) : 
         if board.winNextMove() >= 0 :
             return board.winNextMove()
+        if board.turnplayed == 0 : return 4
         
         newboard = board.clone()
         values = self.MCST(newboard)
@@ -166,7 +212,7 @@ class MCSTPlayer(Player) :
                 
                 currentNode = currentNode.children[succUCB.index(max(succUCB))] #choose the node with max UBC
             
-            if currentNode.board.checkWin() < 0 and currentNode.board.turnplayed < board.cols * board.rows: #if board is not a final board
+            if currentNode.board.checkWin() < 0 and currentNode.board.turnplayed < board.draw: #if board is not a final board
 
                 #creating children
                 for i in range(board.cols) :
@@ -181,16 +227,16 @@ class MCSTPlayer(Player) :
 
                 #random playout
                 start = selectedson.board.clone()
-                while start.checkWin() < 0 and start.turnplayed < start.rows * start.cols :
+                while start.checkWin() < 0 and start.turnplayed < start.draw :
                     start.play(random.randint(1,start.cols))
             
-                if start.turnplayed == start.rows * start.cols : #if draw
+                if start.turnplayed == start.draw : #if draw
                     won = 0
                 else :
                     won = 1 if self.name != start.player.name else -1
             else :
                 selectedson = currentNode
-                if currentNode.board.turnplayed == board.rows * board.cols :
+                if currentNode.board.turnplayed == board.draw :
                     won = 0
                 else :
                     won = 1 if self.name != currentNode.board.player.name else -1
