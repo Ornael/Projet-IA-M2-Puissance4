@@ -1,6 +1,9 @@
 from tkinter import Tk, Canvas, Frame, Label, OptionMenu, StringVar, Button
+
+from tqdm import tk
+
 from proje import Board
-from player import InterfacePlayer
+from player import InterfacePlayer, MinMaxPlayer, MCSTPlayer
 
 # define the dimensions of the grid
 num_columns = 7
@@ -13,12 +16,12 @@ cell_height = 40
 root = Tk()
 frm = Frame(root)
 frm.grid()
+inite = True
+cnv = Canvas(frm, width=400, height=300)
+cnv.grid(column=1, row=0, padx=(130, 10))
 
 cnv4 = Canvas(frm, width=600, height=150)
 cnv4.grid(columnspan=3, row=1)
-cnv4.pack_propagate(False)
-cnv = Canvas(frm, width=400, height=300)
-cnv.grid(column=1, row=0,padx=(130, 10))
 
 stvar = StringVar()
 stvar.set("MonteCarlo")
@@ -47,14 +50,14 @@ def on_canvas_click(event):
                 num_joueur = board.player.number
                 if num_joueur == 1:
                     cnv.create_oval((column * cell_width) + (cell_width / 2) - 15,
-                                    ((5-row) * cell_height) + (cell_width / 2) - 15,
+                                    ((5 - row) * cell_height) + (cell_width / 2) - 15,
                                     (column * cell_width) + (cell_width / 2) + 15,
-                                    ((5-row) * cell_height) + (cell_width / 2) + 15, fill="red")
+                                    ((5 - row) * cell_height) + (cell_width / 2) + 15, fill="red")
                 else:
                     cnv.create_oval((column * cell_width) + (cell_width / 2) - 15,
-                                    ((5-row) * cell_height) + (cell_width / 2) - 15,
+                                    ((5 - row) * cell_height) + (cell_width / 2) - 15,
                                     (column * cell_width) + (cell_width / 2) + 15,
-                                    ((5-row) * cell_height) + (cell_width / 2) + 15, fill="yellow")
+                                    ((5 - row) * cell_height) + (cell_width / 2) + 15, fill="yellow")
             else:
                 print("invalid move")
     else:
@@ -63,7 +66,7 @@ def on_canvas_click(event):
 
     if board.checkWin() >= 0:
         print("Win : " + board.getOtherPlayerName())
-        Label(cnv4,text="La partie est terminé " + board.getOtherPlayerName() + " est le gagnant").pack()
+        Label(cnv4, text="La partie est terminé " + board.getOtherPlayerName() + " est le gagnant").pack()
         return
     if board.turnplayed == board.cols * board.rows:
         print("Draw")
@@ -73,10 +76,59 @@ def on_canvas_click(event):
 
 cnv.bind("<Button-1>", on_canvas_click)
 
-def ValeurJ1():
-    print(stvar.get())
-def ValeurJ2():
-    print(stvar2.get())
+
+def initBoard():
+    MenuJ1["state"] = ["disabled"]
+    menuJ2["state"] = ["disabled"]
+    global board
+    if inite:
+        if stvar.get() == "MinMax":
+            player1 = MinMaxPlayer("Axel", 6)
+        elif stvar.get() == "MonteCarlo":
+            player1 = MCSTPlayer("Axel", 2500)
+        else:
+            player1 = InterfacePlayer("Axel")
+
+        if stvar2.get() == "MinMax":
+            player2 = MinMaxPlayer("lexa", 6)
+        elif stvar2.get() == "MonteCarlo":
+            player2 = MCSTPlayer("lexa", 2500)
+        else:
+            player2 = InterfacePlayer("lexa")
+        board = Board(player1, player2)
+        init = False
+
+    if board.checkWin() < 0:
+        if not isinstance(board.player, InterfacePlayer):
+            col = board.player.moveChoice(board)
+            board.play(col)
+            board.print()
+            num_joueur = board.player.number
+            if num_joueur == 1:
+                cnv.create_oval((col * cell_width) + (cell_width / 2) - 15,
+                                ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) - 15,
+                                (col * cell_width) + (cell_width / 2) + 15,
+                                ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) + 15, fill="red")
+            else:
+                cnv.create_oval((col * cell_width) + (cell_width / 2) - 15,
+                                ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) - 15,
+                                (col * cell_width) + (cell_width / 2) + 15,
+                                ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) + 15, fill="yellow")
+    else:
+        print("Board is already final")
+        return
+
+    if board.checkWin() >= 0:
+        print("Win : " + board.getOtherPlayerName())
+        Label(cnv4, text="La partie est terminé " + board.getOtherPlayerName() + " est le gagnant").pack()
+        return
+    if board.turnplayed == board.cols * board.rows:
+        print("Draw")
+        return
+
+
+buttonPlay = Button(cnv4, text="Jouer", command=initBoard)
+buttonPlay.pack(side="top")
 
 cnv2 = Canvas(frm, width=150, height=300)
 cnv2.grid(column=0, row=0)
@@ -84,7 +136,6 @@ cnv2.grid(column=0, row=0)
 Label(cnv2, text="J1").pack(side="top")
 MenuJ1 = OptionMenu(cnv2, stvar, "MonteCarlo", "MinMax", "Joueur humain")
 MenuJ1.pack(side="top")
-Button(cnv2, text="Jouer", command=ValeurJ1).pack(side="top")
 # create a red circle below the button in the second canvas
 x = 75  # x-coordinate of the center of the circle
 y = 150  # y-coordinate of the center of the circle
@@ -97,7 +148,6 @@ cnv3.grid(column=2, row=0)
 Label(cnv3, text="J2").pack(side="top")
 menuJ2 = OptionMenu(cnv3, stvar2, "MonteCarlo", "MinMax", "Joueur humain")
 menuJ2.pack(side="top")
-Button(cnv3, text="Jouer", command=ValeurJ2).pack(side="top")
 # create a red circle below the button in the second canvas
 x = 75  # x-coordinate of the center of the circle
 y = 150  # y-coordinate of the center of the circle
@@ -107,6 +157,7 @@ cnv3.create_oval(x - r, y - r, x + r, y + r, fill="yellow")
 cnv.pack_propagate(False)
 cnv2.pack_propagate(False)
 cnv3.pack_propagate(False)
+cnv4.pack_propagate(False)
 
 board = Board(InterfacePlayer("Axel"), InterfacePlayer("Lexa"))
 
