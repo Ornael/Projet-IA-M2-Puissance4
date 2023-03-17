@@ -14,8 +14,17 @@ root = Tk()
 frm = Frame(root)
 frm.grid()
 
+cnv4 = Canvas(frm, width=600, height=150)
+cnv4.grid(columnspan=3, row=1)
+cnv4.pack_propagate(False)
 cnv = Canvas(frm, width=400, height=300)
-cnv.grid(column=1, row=0)
+cnv.grid(column=1, row=0,padx=(130, 10))
+
+stvar = StringVar()
+stvar.set("MonteCarlo")
+
+stvar2 = StringVar()
+stvar2.set("MonteCarlo")
 
 # draw the grid of rectangles
 for i in range(num_rows):
@@ -28,7 +37,7 @@ for i in range(num_rows):
 
 
 def on_canvas_click(event):
-    column = (event.x) // 40
+    column = event.x // 40
     if board.checkWin() < 0:
         if isinstance(board.player, InterfacePlayer):
             if 0 <= column < 7 and board.firstfreerow[column] < board.rows:
@@ -54,6 +63,7 @@ def on_canvas_click(event):
 
     if board.checkWin() >= 0:
         print("Win : " + board.getOtherPlayerName())
+        Label(cnv4,text="La partie est terminé " + board.getOtherPlayerName() + " est le gagnant").pack()
         return
     if board.turnplayed == board.cols * board.rows:
         print("Draw")
@@ -63,14 +73,18 @@ def on_canvas_click(event):
 
 cnv.bind("<Button-1>", on_canvas_click)
 
+def ValeurJ1():
+    print(stvar.get())
+def ValeurJ2():
+    print(stvar2.get())
+
 cnv2 = Canvas(frm, width=150, height=300)
 cnv2.grid(column=0, row=0)
 # create a label and add it to the second canvas
 Label(cnv2, text="J1").pack(side="top")
-stvar = StringVar()
-stvar.set("MonteCarlo")
-OptionMenu(cnv2, stvar, "MonteCarlo", "MinMax", "Joueur humain").pack(side="top")
-Button(cnv2, text="Jouer").pack(side="top")
+MenuJ1 = OptionMenu(cnv2, stvar, "MonteCarlo", "MinMax", "Joueur humain")
+MenuJ1.pack(side="top")
+Button(cnv2, text="Jouer", command=ValeurJ1).pack(side="top")
 # create a red circle below the button in the second canvas
 x = 75  # x-coordinate of the center of the circle
 y = 150  # y-coordinate of the center of the circle
@@ -81,23 +95,18 @@ cnv3 = Canvas(frm, width=150, height=300)
 cnv3.grid(column=2, row=0)
 # create a label and add it to the second canvas
 Label(cnv3, text="J2").pack(side="top")
-stvar2 = StringVar()
-stvar2.set("MonteCarlo")
-OptionMenu(cnv3, stvar2, "MonteCarlo", "MinMax", "Joueur humain").pack(side="top")
-Button(cnv3, text="Jouer").pack(side="top")
+menuJ2 = OptionMenu(cnv3, stvar2, "MonteCarlo", "MinMax", "Joueur humain")
+menuJ2.pack(side="top")
+Button(cnv3, text="Jouer", command=ValeurJ2).pack(side="top")
 # create a red circle below the button in the second canvas
 x = 75  # x-coordinate of the center of the circle
 y = 150  # y-coordinate of the center of the circle
 r = 35  # radius of the circle
 cnv3.create_oval(x - r, y - r, x + r, y + r, fill="yellow")
 
-cnv4 = Canvas(frm, width=600, height=150)
-cnv4.grid(columnspan=3, row=1)
-
 cnv.pack_propagate(False)
 cnv2.pack_propagate(False)
 cnv3.pack_propagate(False)
-cnv4.pack_propagate(False)
 
 board = Board(InterfacePlayer("Axel"), InterfacePlayer("Lexa"))
 
