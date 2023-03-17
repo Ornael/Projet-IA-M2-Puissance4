@@ -174,7 +174,9 @@ class MinMaxPlayer(Player) :
 
         #score auto diagonals
 
-        i,j = 0
+        #top left to bottom right
+        
+        i,j = 0,0
 
         
 

@@ -74,23 +74,23 @@ def on_canvas_click(event):
 cnv.bind("<Button-1>", on_canvas_click)
 
 
-def playIA():
+def playIA(depth,iter):
   
     if MenuJ1["state"] != "disabled" :
         global board
         MenuJ1["state"] = ["disabled"]
         menuJ2["state"] = ["disabled"]
         if stvar.get() == "MinMax":
-            player1 = MinMaxPlayer("Axel", 6)
+            player1 = MinMaxPlayer("Axel", depth)
         elif stvar.get() == "MonteCarlo":
-            player1 = MCSTPlayer("Axel", 2000)
+            player1 = MCSTPlayer("Axel", iter)
         else:
             player1 = InterfacePlayer("Axel")
 
         if stvar2.get() == "MinMax":
-            player2 = MinMaxPlayer("lexa", 6)
+            player2 = MinMaxPlayer("lexa", depth)
         elif stvar2.get() == "MonteCarlo":
-            player2 = MCSTPlayer("lexa", 2000)
+            player2 = MCSTPlayer("lexa", iter)
         else:
             player2 = InterfacePlayer("lexa")
         board = Board(player1, player2)
@@ -124,7 +124,7 @@ def playIA():
         return
 
 
-buttonPlay = Button(cnv4, text="Jouer", command=playIA)
+buttonPlay = Button(cnv4, text="Jouer", command=lambda : playIA(depth=6,iter = 2000))
 buttonPlay.pack(side="top")
 
 cnv2 = Canvas(frm, width=150, height=300)
