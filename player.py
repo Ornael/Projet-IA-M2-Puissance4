@@ -50,7 +50,7 @@ class MinMaxPlayer(Player) :
                 nb.play(i+1)
                 values[i] = self.minmax(nb,self.depth-1,-100000,100000,False) 
         
-        print( values)
+        print(values)
         return values.index(max(values)) + 1
    
     def minmax(self,board, depth : int, alpha : int, beta : int, maximizing_player : bool) -> float :
@@ -111,7 +111,8 @@ class MinMaxPlayer(Player) :
                         count *=10
                         j += 1
 
-                    aligned = j -originalj
+                    aligned = j - originalj
+
                     if aligned == 3 : #3 in a row
                         if j < board.cols and board.grille[i][j] == -1 : winright = 1
                         if originalj > 0 and board.grille[i][originalj -1] == - 1 : winleft = 1
@@ -125,7 +126,18 @@ class MinMaxPlayer(Player) :
                                 winleft = 1
                                 if board.grille[i][originalj - 2] == symbol : count *= 10
                     else :
-                        pass
+                        if j > 2 :
+                            if board.grille[i][j-2] == symbol ^ board.grille[i][j-3] == symbol :
+                                winleft = 1
+                                count *= 10
+                            elif board.grille[i][j-1] == -1 and board.grille[i][j-2] == -1 and board.grille[i][j-3] == -1 :
+                                winleft = 1
+                        if j < board.cols - 2 :
+                            if board.grille[i][j+1] == symbol ^ board.grille[i][j+2] == symbol :
+                                winright = 1
+                                count *= 10
+                            elif board.grille[i][j] == -1 and board.grille[i][j+1] == -1 and board.grille[i][j+2] == -1 :
+                                winright = 1
 
                     if symbol == self.number :
                         scoreboardplayer += (winright+winleft) * count
@@ -160,6 +172,11 @@ class MinMaxPlayer(Player) :
             i += 1
             j = 0
 
+        #score auto diagonals
+
+        i,j = 0
+
+        
 
         return scoreboardplayer - scoreotherplayer
 
