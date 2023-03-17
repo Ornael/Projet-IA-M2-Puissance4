@@ -1,7 +1,5 @@
 from tkinter import Tk, Canvas, Frame, Label, OptionMenu, StringVar, Button
 
-from tqdm import tk
-
 from proje import Board
 from player import InterfacePlayer, MinMaxPlayer, MCSTPlayer
 
@@ -12,11 +10,10 @@ num_rows = 6
 # define the dimensions of each cell in the grid
 cell_width = 40
 cell_height = 40
-
+inite = True
 root = Tk()
 frm = Frame(root)
 frm.grid()
-inite = True
 cnv = Canvas(frm, width=400, height=300)
 cnv.grid(column=1, row=0, padx=(130, 10))
 
@@ -77,26 +74,26 @@ def on_canvas_click(event):
 cnv.bind("<Button-1>", on_canvas_click)
 
 
-def initBoard():
-    MenuJ1["state"] = ["disabled"]
-    menuJ2["state"] = ["disabled"]
-    global board
-    if inite:
+def playIA():
+  
+    if MenuJ1["state"] != "disabled" :
+        global board
+        MenuJ1["state"] = ["disabled"]
+        menuJ2["state"] = ["disabled"]
         if stvar.get() == "MinMax":
             player1 = MinMaxPlayer("Axel", 6)
         elif stvar.get() == "MonteCarlo":
-            player1 = MCSTPlayer("Axel", 2500)
+            player1 = MCSTPlayer("Axel", 2000)
         else:
             player1 = InterfacePlayer("Axel")
 
         if stvar2.get() == "MinMax":
             player2 = MinMaxPlayer("lexa", 6)
         elif stvar2.get() == "MonteCarlo":
-            player2 = MCSTPlayer("lexa", 2500)
+            player2 = MCSTPlayer("lexa", 2000)
         else:
             player2 = InterfacePlayer("lexa")
         board = Board(player1, player2)
-        init = False
 
     if board.checkWin() < 0:
         if not isinstance(board.player, InterfacePlayer):
@@ -105,14 +102,14 @@ def initBoard():
             board.print()
             num_joueur = board.player.number
             if num_joueur == 1:
-                cnv.create_oval((col * cell_width) + (cell_width / 2) - 15,
+                cnv.create_oval(((col-1) * cell_width) + (cell_width / 2) - 15,
                                 ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) - 15,
-                                (col * cell_width) + (cell_width / 2) + 15,
+                                ((col-1) * cell_width) + (cell_width / 2) + 15,
                                 ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) + 15, fill="red")
             else:
-                cnv.create_oval((col * cell_width) + (cell_width / 2) - 15,
+                cnv.create_oval(((col-1) * cell_width) + (cell_width / 2) - 15,
                                 ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) - 15,
-                                (col * cell_width) + (cell_width / 2) + 15,
+                                ((col-1) * cell_width) + (cell_width / 2) + 15,
                                 ((5 - board.lastplay[0]) * cell_height) + (cell_width / 2) + 15, fill="yellow")
     else:
         print("Board is already final")
@@ -122,12 +119,12 @@ def initBoard():
         print("Win : " + board.getOtherPlayerName())
         Label(cnv4, text="La partie est terminé " + board.getOtherPlayerName() + " est le gagnant").pack()
         return
-    if board.turnplayed == board.cols * board.rows:
+    if board.turnplayed == board.draw :
         print("Draw")
         return
 
 
-buttonPlay = Button(cnv4, text="Jouer", command=initBoard)
+buttonPlay = Button(cnv4, text="Jouer", command=playIA)
 buttonPlay.pack(side="top")
 
 cnv2 = Canvas(frm, width=150, height=300)
@@ -159,6 +156,6 @@ cnv2.pack_propagate(False)
 cnv3.pack_propagate(False)
 cnv4.pack_propagate(False)
 
-board = Board(InterfacePlayer("Axel"), InterfacePlayer("Lexa"))
+#board = Board(InterfacePlayer("Axel"), InterfacePlayer("Lexa"))
 
 root.mainloop()
