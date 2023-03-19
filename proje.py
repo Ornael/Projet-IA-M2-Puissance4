@@ -143,9 +143,9 @@ class Board :
             if nb.checkWin() >= 0:
                 return i+1       
         return -1
-
+    
 if __name__ == '__main__':
-     board = Board(MCSTPlayer("Axel",3000,3),MinMaxPlayer("Lexa",depth=6),6,7)
+     board = Board(MCSTPlayer("Axel",4000,2),MinMaxPlayer("Lexa",depth=6),6,7)
 
      while board.checkWin() < 0 and board.turnplayed < board.draw :
 
@@ -154,27 +154,23 @@ if __name__ == '__main__':
              print("played : ")
              board.print()
 
-     if board.turnplayed < board.draw :
+     if board.checkWin() >= 0 :
         print("Win : " + board.getOtherPlayerName())
      else :
-        print("Draw") 
-
+        print("Draw")  
 
 
 """ board = Board(ConsolePlayer("Axel"),MinMaxPlayer("Lexa",depth=6),6,7)
 
+
 board.play(4)
-board.play(6)
-board.play(7)
-board.play(6)
-board.play(6)
-board.play(6)
+board.play(4)
 board.play(7)
 board.play(7)
-
-
+board.play(5)
+board.play(5)
 
 board.print()
 
-print(board.player2.evaluate(board)) """
 
+print(board.player2.evaluate(board))  """
