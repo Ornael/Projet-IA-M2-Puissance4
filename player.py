@@ -98,7 +98,6 @@ class MinMaxPlayer(Player) :
         while i < board.rows :
             while j < board.cols:
                 symbol = board.grille[i][j]
-                
                 if symbol >= 0 :
 
                     othersymbol = 1 - symbol
@@ -126,14 +125,15 @@ class MinMaxPlayer(Player) :
                                 winleft = 1
                                 if board.grille[i][originalj - 2] == symbol : count *= 10
                     else :
-                        if j > 2 :
-                            if board.grille[i][j-2] == symbol ^ board.grille[i][j-3] == symbol :
+                        if originalj > 2 :
+                            if board.grille[i][originalj-2] == symbol and board.grille[i][originalj-1] == -1 and board.grille[i][originalj-3] == -1 :
                                 winleft = 1
                                 count *= 10
-                            elif board.grille[i][j-1] == -1 and board.grille[i][j-2] == -1 and board.grille[i][j-3] == -1 :
+                            elif board.grille[i][originalj-1] == -1 and board.grille[i][originalj-2] == -1 and board.grille[i][originalj-3] == -1 :
                                 winleft = 1
                         if j < board.cols - 2 :
-                            if board.grille[i][j+1] == symbol ^ board.grille[i][j+2] == symbol :
+                            
+                            if ((board.grille[i][j+1] == symbol) ^ (board.grille[i][j+2] == symbol)) and board.grille[i][j] == -1 and board.grille[i][j+1] != othersymbol and board.grille[i][j+2] != othersymbol :
                                 winright = 1
                                 count *= 10
                             elif board.grille[i][j] == -1 and board.grille[i][j+1] == -1 and board.grille[i][j+2] == -1 :
@@ -156,7 +156,7 @@ class MinMaxPlayer(Player) :
             while j < board.rows - 3 :
                 symbol = board.grille[j][i]
                 othersymbol = 1 - symbol
-                if symbol >= 0 and board.grille[j+1][i] != othersymbol and board.grille[j+2][i] != othersymbol   and board.grille[j+3][i] != othersymbol :
+                if symbol >= 0 and board.grille[j+1][i] != othersymbol and board.grille[j+2][i] != othersymbol  and board.grille[j+3][i] != othersymbol :
                     count = 1
                     j+=1
                     while j < board.rows and board.grille[j][i] == symbol :
@@ -174,12 +174,138 @@ class MinMaxPlayer(Player) :
 
         #score auto diagonals
 
-        #top left to bottom right
-        
-        i,j = 0,0
+        #top left to bottom right, column
 
-        
+        i,j = 3,0
+        counti = 3
 
+        while i < board.rows :
+            while i >= 0 :
+                symbol = board.grille[i][j]
+                originali = i
+                originalj = j
+                if symbol >= 0 :
+                    count = 1
+                    othersymbol = 1 - symbol
+                    winleft,winright = 0,0
+                    
+                    while i > 0 and board.grille[i-1][j+1] == symbol :
+                        count *=10
+                        j += 1
+                        i -= 1
+
+                    aligned = originali - i + 1
+
+                    if aligned == 3 :
+                        if originalj > 0 :
+                            if board.grille[originali + 1][originalj - 1] == -1 :
+                                winleft = 1
+                        if i > 0:
+                            if board.grille[i - 1][j + 1] == -1 :
+                                winright = 1
+                    elif aligned == 2 :
+                        if originalj > 1 :
+                            if board.grille[originali + 1][originalj - 1] != othersymbol and board.grille[originali + 2][originalj - 2] != othersymbol :
+                                winleft = 1
+                                if board.grille[originali + 2][originalj - 2] == symbol : count *= 10
+                        if i > 1 : 
+                            if board.grille[i - 1][j + 1] != othersymbol and board.grille[i - 2][j + 2] != othersymbol :
+                                winright = 1
+                                if board.grille[i - 2][j + 2] == symbol : count *= 10
+                    else :
+                        if j > 2 :
+                            if board.grille[i+2][j-2] == symbol and board.grille[i+3][j-3] == -1 and board.grille[i+1][j-1] == -1 :
+                                winleft = 1
+                                count *= 10
+                            elif board.grille[i+1][j-1] == -1 and board.grille[i+2][j-2] == -1 and board.grille[i+3][j-3] == -1 :
+                                    winleft = 1
+                        if i > 2 :
+                            if ((board.grille[i-2][j+2] == symbol) ^ (board.grille[i-3][j+3] == symbol)) and board.grille[i-1][j+1] == -1 and board.grille[i-2][j+2] != othersymbol and board.grille[i-3][j+3] != othersymbol:
+                                winright = 1
+                                count *= 10
+                            elif board.grille[i-1][j+1] == -1 and board.grille[i-2][j+2] == -1 and board.grille[i-3][j+3] == -1 :
+                                winright = 1
+
+                        
+                    if symbol == self.number :
+                        scoreboardplayer += (winright+winleft) * count
+                    else :
+                        scoreotherplayer += (winright+winleft) * count
+               
+                i -= 1
+                j += 1
+                                        
+            i = counti + 1
+            counti += 1
+            j = 0
+            
+        #top left to bottom right, rows
+
+        i,j = board.rows-1,1
+        countj = 1
+
+        while j < board.cols - 3 :
+            while j < board.cols:
+                symbol = board.grille[i][j]
+                originali = i
+                originalj = j  
+                if symbol >= 0 :
+                    count = 1
+                    othersymbol = 1 - symbol
+                    winleft,winright = 0,0
+                
+
+                    while j < board.cols - 1 and i > 0 and board.grille[i-1][j+1] == symbol :
+                        count *=10
+                        j += 1
+                        i -= 1
+
+                    aligned = originali - i + 1
+
+                    if aligned == 3 :
+                        if originali < board.rows - 1 :
+                            if board.grille[originali + 1][originalj - 1] == -1 :
+                                winleft = 1
+                        if j < board.cols - 1:
+                            if board.grille[i - 1][j + 1] == -1 :
+                                winright = 1
+                    elif aligned == 2 :
+                        if originali < board.rows - 2 :
+                            if board.grille[originali + 1][originalj - 1] != othersymbol and board.grille[originali + 2][originalj - 2] != othersymbol :
+                                winleft = 1
+                                if board.grille[originali + 2][originalj - 2] == symbol : count *= 10
+                        if j < board.cols - 2 : 
+                            if board.grille[i - 1][j + 1] != othersymbol and board.grille[i - 2][j + 2] != othersymbol :
+                                winright = 1
+                                if board.grille[i - 2][j + 2] == symbol : count *= 10
+                    else :
+                        if i < board.rows - 3 :
+                            if board.grille[i+2][j-2] == symbol and board.grille[i+1][j-1] == -1 and board.grille[i+3][j-3] == -1 :
+                                winleft = 1
+                                count *= 10
+                            elif board.grille[i+1][j-1] == -1 and board.grille[i+2][j-2] == -1 and board.grille[i+3][j-3] == -1 :
+                                winleft = 1
+                        if j < board.cols -  3:
+                            if ((board.grille[i-2][j+2] == symbol) ^ (board.grille[i-3][j+3] == symbol)) and board.grille[i-1][j+1] == -1 and board.grille[i-2][j+2] != othersymbol and board.grille[i-3][j+3] != othersymbol:
+                                winright = 1
+                                count *= 10
+                            elif board.grille[i-1][j+1] == -1 and board.grille[i-2][j+2] == -1 and board.grille[i-3][j+3] == -1 :
+                                winright = 1
+
+                        
+                    if symbol == self.number :
+                        scoreboardplayer += (winright+winleft) * count
+                    else :
+                        scoreotherplayer += (winright+winleft) * count
+                
+                i -= 1
+                j += 1
+                                     
+            i = board.rows - 1
+            j = countj +  1
+            countj += 1
+        
+        #print(scoreboardplayer)
         return scoreboardplayer - scoreotherplayer
 
     
