@@ -50,7 +50,6 @@ class MinMaxPlayer(Player) :
                 nb.play(i+1)
                 values[i] = self.minmax(nb,self.depth-1,-100000,100000,False) 
         
-        print(values)
         return values.index(max(values)) + 1
    
     def minmax(self,board, depth : int, alpha : int, beta : int, maximizing_player : bool) -> float :

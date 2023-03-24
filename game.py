@@ -1,6 +1,5 @@
 import copy
 from player import Player,MinMaxPlayer,MCSTPlayer,ConsolePlayer
-import math
 
 class Board :
     def __init__(self,player1 : Player,player2: Player,rows = 6,cols = 7):
@@ -144,33 +143,64 @@ class Board :
                 return i+1       
         return -1
     
-if __name__ == '__main__':
-     board = Board(MCSTPlayer("Axel",4000,2),MinMaxPlayer("Lexa",depth=6),6,7)
+""" if __name__ == '__main__':
+     
+     count = 50
+     J1winSTART,J2winEND,draw1 = 0,0,0
+     while count > 0:
 
-     while board.checkWin() < 0 and board.turnplayed < board.draw :
+        board = Board(MCSTPlayer("J1",iter=3000,c=2),MinMaxPlayer("J2",depth=7),6,7)
 
-         if board.play(board.player.moveChoice(board))  : #try to play, print if move successful
-             print(board.getOtherPlayerName())
-             print("played : ")
-             board.print()
+        while board.checkWin() < 0 and board.turnplayed < board.draw :
+             board.play(board.player.moveChoice(board)) #try to play, print if move successful
 
-     if board.checkWin() >= 0 :
-        print("Win : " + board.getOtherPlayerName())
-     else :
-        print("Draw")  
+        if board.checkWin() >= 0 :
+            if board.player.name == "J1" :
+                J2winEND +=1 
+            if board.player.name == "J2" :
+                J1winSTART += 1
+        else :
+            draw1 += 1
+        
+        count-=1
+
+     J1winEND,J2winSTART,draw2 = 0,0,0
+     count = 50
+
+     while count > 0 :
+
+        board = Board(MinMaxPlayer("J2",depth=7),MCSTPlayer("J1",iter=3000,c=2),6,7)
+
+        while board.checkWin() < 0 and board.turnplayed < board.draw :
+            board.play(board.player.moveChoice(board)) #try to play, print if move successful
+
+        if board.checkWin() >= 0 :
+            if board.player.name == "J1" :
+                J2winSTART +=1 
+            if board.player.name == "J2" :
+                J1winEND += 1
+        else :
+            draw2 += 1
+        
+        count -= 1
 
 
-""" board = Board(ConsolePlayer("Axel"),MinMaxPlayer("Lexa",depth=6),6,7)
 
+print("Win J1 start (2) : " + str(J1winSTART))
+print("Win J2 end (MinMax 7) :  " + str(J2winEND))
+print("draw1 : "+ str(draw1))
 
-board.play(4)
-board.play(4)
-board.play(7)
-board.play(7)
-board.play(5)
-board.play(5)
+print("Win J1 end (2) : " + str(J1winEND))
+print("Win J2 start (MinMax 7) :  " + str(J2winSTART))
+print("draw2 : "+ str(draw2)) """
 
-board.print()
+board = Board(ConsolePlayer("J1"),MCSTPlayer("J2",iter=3000,c=2))
 
+while board.checkWin() < 0 and board.turnplayed < board.draw :
+         board.play(board.player.moveChoice(board)) #try to play, print if move successful
+         board.print(p0symbol="A",p1symbol="B")
 
-print(board.player2.evaluate(board))  """
+if board.checkWin() >= 0 :
+    print("Vainqueur : " + board.getOtherPlayerName())
+else :
+    print("Egalité")

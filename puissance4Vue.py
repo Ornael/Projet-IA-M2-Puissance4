@@ -1,6 +1,6 @@
 from tkinter import Tk, Canvas, Frame, Label, OptionMenu, StringVar, Button
 
-from proje import Board
+from game import Board
 from player import InterfacePlayer, MinMaxPlayer, MCSTPlayer
 
 # define the dimensions of the grid
@@ -42,7 +42,6 @@ def on_canvas_click(event):
         if isinstance(board.player, InterfacePlayer):
             if 0 <= column < 7 and board.firstfreerow[column] < board.rows:
                 board.play(column + 1)
-                board.print()
                 row, col = board.lastplay
                 num_joueur = board.player.number
                 if num_joueur == 1:
@@ -99,7 +98,6 @@ def playIA(depth,iter):
         if not isinstance(board.player, InterfacePlayer):
             col = board.player.moveChoice(board)
             board.play(col)
-            board.print()
             num_joueur = board.player.number
             if num_joueur == 1:
                 cnv.create_oval(((col-1) * cell_width) + (cell_width / 2) - 15,
@@ -124,7 +122,7 @@ def playIA(depth,iter):
         return
 
 
-buttonPlay = Button(cnv4, text="Jouer", command=lambda : playIA(depth=6,iter = 2000))
+buttonPlay = Button(cnv4, text="Jouer", command=lambda : playIA(depth=6,iter = 3000))
 buttonPlay.pack(side="top")
 
 cnv2 = Canvas(frm, width=150, height=300)
